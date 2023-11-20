@@ -1,0 +1,25 @@
+FROM rust:1.67 
+
+RUN groupadd -r myapp && useradd -r -g myapp -m -d /usr/src/myapp
+
+WORKDIR /usr/src/myapp
+
+COPY . .
+
+RUN chown -R myapp:myapp /usr/src/myapp
+
+RUN cargo build --release
+
+
+
+FROM debian:latest
+
+RUN groupadd -r myapp && useradd -r -g myapp -m -d /usr/src/myapp myapp
+
+WORKDIR /usr/src/myapp
+
+COPY --from=builder --chown=myapp:myapp /usr/src/myapp/target/release/wik_dps_tp01 /usr/src/myapp/target/release/wik_dps_tp01
+
+USER myapp
+
+CMD ["/usr/src/myapp/target/release/wik_dps_tp01"]
